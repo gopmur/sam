@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+      {
+          "name": "Debug Rust Tests",
+          "type": "lldb-dap",
+          "request": "attach",
+          "program": "{workspaceFolder}/target/debug/sam_cli",
+          "sourceMap": []
+      }
+  ]
+}
