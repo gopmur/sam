@@ -3,10 +3,11 @@
   "configurations": [
       {
           "name": "Debug Rust Tests",
-          "type": "lldb-dap",
-          "request": "attach",
-          "program": "{workspaceFolder}/target/debug/sam_cli",
-          "sourceMap": []
+          "type": "lldb",
+          "request": "launch",
+          "program": "${workspaceFolder}/target/debug/sam_cli", // Replace with your test binary name
+          "args": [],
+          "cwd": "${workspaceFolder}"
       }
   ]
 }

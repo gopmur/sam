@@ -6,10 +6,14 @@ struct Branch {
 
 impl Branch {
     const VALID_TYPES: [&str; 2] = ["feature", "hotfix"];
+    const SPECIAL_NAMES: [&str; 3] = ["develop", "main", "master"];
     fn validate_name(name: &str) -> bool {
         if name.is_empty() {
             return false;
         }
+        if Self::SPECIAL_NAMES.contains(&name) {
+            return true;
+        };
         'outer: for valid_type in Self::VALID_TYPES.iter() {
             if !name.starts_with(&format!("{}/RCT-", valid_type)) {
                 continue;
@@ -98,6 +102,26 @@ mod tests {
     #[test]
     fn test_validate_name_12() {
         assert_eq!(Branch::validate_name("featureRCT-1234_something"), false);
+    }
+
+    #[test]
+    fn test_validate_name_13() {
+        assert_eq!(Branch::validate_name("master"), true);
+    }
+
+    #[test]
+    fn test_validate_name_14() {
+        assert_eq!(Branch::validate_name("main"), true);
+    }
+
+    #[test]
+    fn test_validate_name_15() {
+        assert_eq!(Branch::validate_name("develop"), true);
+    }
+
+    #[test]
+    fn test_validate_name_16() {
+        assert_eq!(Branch::validate_name("dfdevelop"), false);
     }
 }
 
