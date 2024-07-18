@@ -128,7 +128,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sam_cli"
+name = "sam"
 version = "0.1.0"
 dependencies = [
  "clap",
