@@ -1,4 +1,7 @@
-struct Branch {
+use super::messages;
+use std::process::Command;
+
+pub struct Branch {
     branch_name: String,
     branch_type: String,
     branch_code: String,
@@ -34,6 +37,18 @@ impl Branch {
             return true;
         }
         return false;
+    }
+
+    pub fn get_branch_name() -> Result<String, String> {
+        Command::new("git")
+            .arg("branch")
+            .arg("--show-current")
+            .output()
+            .map_err(|error| error.to_string())
+            .and_then(|output| {
+                String::from_utf8(output.stdout)
+                    .map_err(|_| String::from(messages::INVALID_BRANCH_NAME))
+            })
     }
 }
 
