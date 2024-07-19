@@ -85,7 +85,9 @@ impl Branch {
             .output()
             .map_err(|_| BranchError::Git)
             .and_then(|output| {
-                String::from_utf8(output.stdout).map_err(|_| BranchError::StringFormat)
+                String::from_utf8(output.stdout)
+                    .map_err(|_| BranchError::StringFormat)
+                    .map(|name| name.trim().to_string())
             })
     }
 }

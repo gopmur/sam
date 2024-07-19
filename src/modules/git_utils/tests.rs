@@ -1,5 +1,42 @@
 use super::*;
 
+fn change_back_branch() -> Result<(), ()> {
+    Command::new("git")
+        .arg("checkout")
+        .arg("-")
+        .output()
+        .map_err(|_| ())?;
+    Ok(())
+}
+
+fn make_branch(branch_name: &str) -> Result<(), ()> {
+    Command::new("git")
+        .arg("checkout")
+        .arg(branch_name)
+        .output()
+        .map_err(|_| ())?;
+    Ok(())
+}
+
+fn delete_branch(branch_name: &str) -> Result<(), ()> {
+    Command::new("git")
+        .arg("branch")
+        .arg("-D")
+        .arg(branch_name)
+        .output()
+        .map_err(|_| ())?;
+    Ok(())
+}
+
+fn change_branch(branch_name: &str) -> Result<(), ()> {
+    Command::new("git")
+        .arg("branch")
+        .arg(branch_name)
+        .output()
+        .map_err(|_| ())?;
+    Ok(())
+}
+
 #[test]
 fn test_validate_name_01() {
     assert_eq!(Branch::validate_name("feature/RCT-2341_something"), true);
@@ -119,14 +156,17 @@ fn test_parse_name_3() {
 }
 
 #[test]
-fn test_new() {
+fn test_new() -> Result<(), ()> {
+    make_and_change_branch("feature/RCT-1234_test_branch").unw;
     assert_eq!(
         Branch::new(),
         Ok(Branch {
             branch_type: String::from("feature"),
             branch_code: String::from("1234"),
-            branch_title: String::from("something"),
+            branch_title: String::from("test_branch"),
             is_special: false
         })
-    )
+    );
+    // change_back_branch()?;
+    Ok(())
 }
