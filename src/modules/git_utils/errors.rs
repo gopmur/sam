@@ -7,6 +7,7 @@ pub enum GitError {
     BranchCode,
     Git,
     CommitType,
+    Commit,
 }
 
 impl fmt::Display for GitError {
@@ -27,6 +28,9 @@ impl fmt::Display for GitError {
             }
             GitError::CommitType => {
                 write!(f, "Invalid commit type.")
+            }
+            GitError::Commit => {
+                write!(f, "Some error happened while committing.")
             }
         }
     }

@@ -44,16 +44,27 @@ impl Branch {
         }
     }
 
-    pub fn commit(&self, commit_type: CommitType, message: &str) -> Result<(), GitError> {
+    pub fn commit(
+        &self,
+        commit_type: CommitType,
+        message: &str,
+        allow_empty: bool,
+    ) -> Result<(), GitError> {
         let commit_message = self.make_commit_message(commit_type, message);
-        Command::new("git")
+        let exit_code = Command::new("git")
             .arg("commit")
-            .arg("--allow-empty")
+            .arg(if allow_empty { "--allow-empty" } else { "" })
             .arg("-m")
             .arg(&commit_message)
-            .output()
-            .map_err(|_| GitError::Git)?;
-        Ok(())
+            .status()
+            .map_err(|_| GitError::Git)?
+            .code()
+            .unwrap_or(-1);
+        if exit_code != 0 {
+            Err(GitError::Commit)
+        } else {
+            Ok(())
+        }
     }
 
     pub fn new() -> Result<Self, GitError> {
@@ -121,9 +132,13 @@ impl Branch {
             .output()
             .map_err(|_| GitError::Git)
             .and_then(|output| {
-                String::from_utf8(output.stdout)
-                    .map_err(|_| GitError::StringFormat)
-                    .map(|name| name.trim().to_string())
+                if output.status.code().unwrap_or(-1) == 0 {
+                    String::from_utf8(output.stdout)
+                        .map_err(|_| GitError::StringFormat)
+                        .map(|name| name.trim().to_string())
+                } else {
+                    Err(GitError::Git)
+                }
             })
     }
 }

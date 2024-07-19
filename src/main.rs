@@ -43,6 +43,6 @@ fn commit(commit_type: &str, message: &str) -> Result<(), GitError> {
         "fix" => CommitType::Fix,
         _ => return Err(GitError::CommitType),
     };
-    branch.commit(commit_type, message)?;
+    branch.commit(commit_type, message, false)?;
     Ok(())
 }
