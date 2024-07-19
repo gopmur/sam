@@ -127,7 +127,7 @@ fn test_make_commit_name_1() {
         is_special: false,
     };
     assert_eq!(
-        branch.make_commit_message(CommitType::Feat, "this is a commit"),
+        branch.make_commit_message(CommitType::Feat, "this is a commit", false),
         "feat(RCT-2222): this is a commit"
     );
 }
@@ -141,7 +141,35 @@ fn test_make_commit_name_2() {
         is_special: true,
     };
     assert_eq!(
-        branch.make_commit_message(CommitType::Feat, "this is a commit"),
+        branch.make_commit_message(CommitType::Feat, "this is a commit", false),
         "feat: this is a commit"
+    );
+}
+
+#[test]
+fn test_make_commit_name_3() {
+    let branch = Branch {
+        branch_code: "".to_string(),
+        branch_title: "master".to_string(),
+        branch_type: "".to_string(),
+        is_special: true,
+    };
+    assert_eq!(
+        branch.make_commit_message(CommitType::Feat, "this is a commit", true),
+        "feat: this is a commit (run_ci)"
+    );
+}
+
+#[test]
+fn test_make_commit_name_4() {
+    let branch = Branch {
+        branch_code: "2222".to_string(),
+        branch_title: "something".to_string(),
+        branch_type: "feature".to_string(),
+        is_special: false,
+    };
+    assert_eq!(
+        branch.make_commit_message(CommitType::Feat, "this is a commit", true),
+        "feat(RCT-2222): this is a commit (run_ci)"
     );
 }

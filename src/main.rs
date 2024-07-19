@@ -1,6 +1,6 @@
 mod modules;
 
-use clap::{Args, Parser, Subcommand};
+use clap::{value_parser, ArgAction, Args, Parser, Subcommand};
 use modules::git_utils::{errors::GitError, Branch, CommitType};
 
 #[derive(Parser)]
@@ -17,33 +17,41 @@ pub enum Action {
 
 #[derive(Args)]
 pub struct CommitArgs {
-    #[clap(action)]
+    #[clap(action, help="Can be either \"feat\", \"fix\", \"style\" or \"chore\"")]
     pub commit_type: String,
 
     #[clap(action)]
     pub message: String,
+
+    #[clap(action=ArgAction::SetTrue, short, long, help="Run CI")]
+    pub run_ci: bool,
+
+    #[clap(action=ArgAction::SetFalse, short, long, help="Do not run git add before committing")]
+    pub no_add: bool,
+
+    #[clap(action=ArgAction::SetTrue, short, long, help="Allow empty commit")]
+    pub empty: bool,
 }
 
 fn main() {
     let args = Cli::parse();
 
     match args.action {
-        Action::Commit(commit_args) => {
-            commit(&commit_args.commit_type, &commit_args.message)
-                .unwrap_or_else(|error| panic!("\n{}", error.to_string()));
+        Action::Commit(args) => {
+            commit(&args).unwrap_or_else(|error| panic!("\n{}", error.to_string()));
         }
     }
 }
 
-fn commit(commit_type: &str, message: &str) -> Result<(), GitError> {
+fn commit(args: &CommitArgs) -> Result<(), GitError> {
     let branch = Branch::new()?;
-    let commit_type = match commit_type {
+    let commit_type = match &args.commit_type[..] {
         "feat" => CommitType::Feat,
         "chore" => CommitType::Chore,
         "style" => CommitType::Style,
         "fix" => CommitType::Fix,
         _ => return Err(GitError::CommitType),
     };
-    branch.commit(commit_type, message, true, false)?;
+    branch.commit(commit_type, &args.message, !args.no_add, args.empty, args.run_ci)?;
     Ok(())
 }

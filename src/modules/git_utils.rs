@@ -24,8 +24,9 @@ impl Branch {
     const VALID_TYPES: [&'static str; 2] = ["feature", "hotfix"];
     const SPECIAL_NAMES: [&'static str; 3] = ["develop", "main", "master"];
     const CODE_PREFIX: &'static str = "RCT-";
+    const RUN_CI: &'static str = "(run_ci)";
 
-    fn make_commit_message(&self, commit_type: CommitType, message: &str) -> String {
+    fn make_commit_message(&self, commit_type: CommitType, message: &str, run_ci: bool) -> String {
         let commit_type = match commit_type {
             CommitType::Chore => "chore",
             CommitType::Feat => "feat",
@@ -33,13 +34,27 @@ impl Branch {
             CommitType::Style => "style",
         };
         if self.is_special {
-            format!("{}: {}", commit_type, message)
+            format!(
+                "{}: {}{}",
+                commit_type,
+                message,
+                if run_ci {
+                    " ".to_string() + Self::RUN_CI
+                } else {
+                    "".to_string()
+                }
+            )
         } else {
             format!(
-                "{}(RCT-{}): {}",
+                "{}(RCT-{}): {}{}",
                 commit_type,
                 self.branch_code,
-                message.trim()
+                message.trim(),
+                if run_ci {
+                    " ".to_string() + Self::RUN_CI 
+                } else {
+                    "".to_string()
+                }
             )
         }
     }
@@ -50,8 +65,9 @@ impl Branch {
         message: &str,
         add: bool,
         allow_empty: bool,
+        run_ci: bool,
     ) -> Result<(), GitError> {
-        let commit_message = self.make_commit_message(commit_type, message);
+        let commit_message = self.make_commit_message(commit_type, message, run_ci);
         if add {
             let exit_code = Command::new("git")
                 .arg("add")
