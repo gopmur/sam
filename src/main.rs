@@ -18,10 +18,10 @@ pub enum Action {
 #[derive(Args)]
 pub struct CommitArgs {
     #[clap(action)]
-    pub message: String,
-
-    #[clap(action)]
     pub commit_type: String,
+    
+    #[clap(action)]
+    pub message: String,
 }
 
 fn main() {
