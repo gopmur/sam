@@ -15,6 +15,7 @@ pub enum Action {
     Commit(CommitArgs),
 }
 
+// ! chore, docs, feat, fix, refactor, style, or test should be added in the future
 #[derive(Args)]
 pub struct CommitArgs {
     #[clap(action, help="Can be either \"feat\", \"fix\", \"style\" or \"chore\"")]
