@@ -48,18 +48,42 @@ impl Branch {
         &self,
         commit_type: CommitType,
         message: &str,
+        add: bool,
         allow_empty: bool,
     ) -> Result<(), GitError> {
         let commit_message = self.make_commit_message(commit_type, message);
-        let exit_code = Command::new("git")
-            .arg("commit")
-            .arg(if allow_empty { "--allow-empty" } else { "" })
-            .arg("-m")
-            .arg(&commit_message)
-            .status()
-            .map_err(|_| GitError::Git)?
-            .code()
-            .unwrap_or(-1);
+        if add {
+            let exit_code = Command::new("git")
+                .arg("add")
+                .arg(".")
+                .status()
+                .map_err(|_| GitError::Git)?
+                .code()
+                .unwrap_or(-1);
+            if exit_code != 0 {
+                return Err(GitError::Add);
+            }
+        }
+        let exit_code = if allow_empty {
+            Command::new("git")
+                .arg("commit")
+                .arg("--allow-empty")
+                .arg("-m")
+                .arg(&commit_message)
+                .status()
+                .map_err(|_| GitError::Git)?
+                .code()
+                .unwrap_or(-1)
+        } else {
+            Command::new("git")
+                .arg("commit")
+                .arg("-m")
+                .arg(&commit_message)
+                .status()
+                .map_err(|_| GitError::Git)?
+                .code()
+                .unwrap_or(-1)
+        };
         if exit_code != 0 {
             Err(GitError::Commit)
         } else {

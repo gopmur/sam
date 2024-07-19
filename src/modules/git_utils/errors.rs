@@ -4,7 +4,7 @@ use core::fmt;
 pub enum GitError {
     NameFormat,
     StringFormat,
-    BranchCode,
+    Add,
     Git,
     CommitType,
     Commit,
@@ -23,8 +23,8 @@ impl fmt::Display for GitError {
                     "Some error happened with git. Make sure git is installed correctly."
                 )
             }
-            GitError::BranchCode => {
-                write!(f, "Branch code is invalid.")
+            GitError::Add => {
+                write!(f, "Some error occurred while running git add.")
             }
             GitError::CommitType => {
                 write!(f, "Invalid commit type.")

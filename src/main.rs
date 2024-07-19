@@ -29,7 +29,8 @@ fn main() {
 
     match args.action {
         Action::Commit(commit_args) => {
-            commit(&commit_args.commit_type, &commit_args.message).unwrap();
+            commit(&commit_args.commit_type, &commit_args.message)
+                .unwrap_or_else(|error| panic!("\n{}", error.to_string()));
         }
     }
 }
@@ -43,6 +44,6 @@ fn commit(commit_type: &str, message: &str) -> Result<(), GitError> {
         "fix" => CommitType::Fix,
         _ => return Err(GitError::CommitType),
     };
-    branch.commit(commit_type, message, false)?;
+    branch.commit(commit_type, message, true, false)?;
     Ok(())
 }
