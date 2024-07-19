@@ -6,6 +6,7 @@ pub enum GitError {
     StringFormat,
     BranchCode,
     Git,
+    CommitType,
 }
 
 impl fmt::Display for GitError {
@@ -16,10 +17,16 @@ impl fmt::Display for GitError {
                 write!(f, "Branch name has unsupported character or is corrupted.")
             }
             GitError::Git => {
-                write!(f, "Some error happened with git. Make sure git is installed correctly.")
+                write!(
+                    f,
+                    "Some error happened with git. Make sure git is installed correctly."
+                )
             }
             GitError::BranchCode => {
                 write!(f, "Branch code is invalid.")
+            }
+            GitError::CommitType => {
+                write!(f, "Invalid commit type.")
             }
         }
     }
