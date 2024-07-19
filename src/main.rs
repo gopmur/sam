@@ -1,6 +1,6 @@
 mod modules;
 
-use clap::{value_parser, ArgAction, Args, Parser, Subcommand};
+use clap::{ArgAction, Args, Parser, Subcommand};
 use modules::git_utils::{errors::GitError, Branch, CommitType};
 
 #[derive(Parser)]
