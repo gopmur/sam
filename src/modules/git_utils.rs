@@ -1,15 +1,17 @@
+mod errors;
 #[cfg(test)]
 mod tests;
-mod errors;
 
 use std::process::Command;
 
 use errors::BranchError;
 
+#[derive(PartialEq, Debug)]
 pub struct Branch {
     branch_type: String,
     branch_code: String,
     branch_title: String,
+    is_special: bool,
 }
 
 impl Branch {
@@ -18,18 +20,22 @@ impl Branch {
     const CODE_PREFIX: &'static str = "RCT-";
     pub fn new() -> Result<Self, BranchError> {
         let raw_name = Self::get_raw_name()?;
-        let (branch_type, branch_code, branch_title) = Self::parse_name(&raw_name)?;
+        let (branch_type, branch_code, branch_title, is_special) = Self::parse_name(&raw_name)?;
         return Ok(Branch {
             branch_code,
             branch_title,
             branch_type,
+            is_special,
         });
     }
 
-    fn parse_name(name: &str) -> Result<(String, String, String), BranchError> {
+    fn parse_name(name: &str) -> Result<(String, String, String, bool), BranchError> {
         if !Self::validate_name(name) {
             return Err(BranchError::NameFormat);
         }
+        if Self::SPECIAL_NAMES.contains(&name) {
+            return Ok((String::from(""), String::from(""), String::from(name), true));
+        };
         let slash_index = name.find('/').ok_or(BranchError::NameFormat)?;
         let branch_code_index = name
             .find(Self::CODE_PREFIX)
@@ -40,7 +46,7 @@ impl Branch {
         let branch_type = String::from(&name[..slash_index]);
         let branch_code = String::from(&name[branch_code_index..branch_code_index_end]);
         let branch_title = String::from(&name[branch_title_index..]);
-        return Ok((branch_type, branch_code, branch_title));
+        return Ok((branch_type, branch_code, branch_title, false));
     }
 
     fn validate_name(name: &str) -> bool {

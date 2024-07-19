@@ -82,3 +82,51 @@ fn test_validate_name_15() {
 fn test_validate_name_16() {
     assert_eq!(Branch::validate_name("dfdevelop"), false);
 }
+
+#[test]
+fn test_parse_name_1() -> Result<(), BranchError> {
+    assert_eq!(
+        Branch::parse_name("feature/RCT-1234_some_title")?,
+        (
+            String::from("feature"),
+            String::from("1234"),
+            String::from("some_title"),
+            false
+        )
+    );
+    Ok(())
+}
+
+#[test]
+fn test_parse_name_2() {
+    assert_eq!(
+        Branch::parse_name("master"),
+        Ok((
+            String::from(""),
+            String::from(""),
+            String::from("master"),
+            true
+        ))
+    )
+}
+
+#[test]
+fn test_parse_name_3() {
+    assert_eq!(
+        Branch::parse_name("feature/RCT-1234something"),
+        Err(BranchError::NameFormat)
+    );
+}
+
+#[test]
+fn test_new() {
+    assert_eq!(
+        Branch::new(),
+        Ok(Branch {
+            branch_type: String::from("feature"),
+            branch_code: String::from("1234"),
+            branch_title: String::from("something"),
+            is_special: false
+        })
+    )
+}
