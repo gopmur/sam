@@ -2,9 +2,15 @@ mod errors;
 #[cfg(test)]
 mod tests;
 
+use errors::GitError;
 use std::process::Command;
 
-use errors::BranchError;
+pub enum CommitType {
+    Feat,
+    Chore,
+    Style,
+    Fix,
+}
 
 #[derive(PartialEq, Debug)]
 pub struct Branch {
@@ -18,7 +24,38 @@ impl Branch {
     const VALID_TYPES: [&'static str; 2] = ["feature", "hotfix"];
     const SPECIAL_NAMES: [&'static str; 3] = ["develop", "main", "master"];
     const CODE_PREFIX: &'static str = "RCT-";
-    pub fn new() -> Result<Self, BranchError> {
+
+    fn make_commit_message(&self, commit_type: CommitType, message: &str) -> String {
+        let commit_type = match commit_type {
+            CommitType::Chore => "chore",
+            CommitType::Feat => "feat",
+            CommitType::Fix => "fix",
+            CommitType::Style => "style",
+        };
+        if self.is_special {
+            format!("{}: {}", commit_type, message)
+        } else {
+            format!(
+                "{}(RCT-{}): {}",
+                commit_type,
+                self.branch_code,
+                message.trim()
+            )
+        }
+    }
+
+    pub fn commit(&self, commit_type: CommitType, message: &str) -> Result<(), GitError> {
+        let commit_message = self.make_commit_message(commit_type, message);
+        Command::new("git")
+            .arg("commit")
+            .arg("-m")
+            .arg(&commit_message)
+            .output()
+            .map_err(|_| GitError::Git)?;
+        Ok(())
+    }
+
+    pub fn new() -> Result<Self, GitError> {
         let raw_name = Self::get_raw_name()?;
         let (branch_type, branch_code, branch_title, is_special) = Self::parse_name(&raw_name)?;
         return Ok(Branch {
@@ -29,19 +66,17 @@ impl Branch {
         });
     }
 
-    fn parse_name(name: &str) -> Result<(String, String, String, bool), BranchError> {
+    fn parse_name(name: &str) -> Result<(String, String, String, bool), GitError> {
         if !Self::validate_name(name) {
-            return Err(BranchError::NameFormat);
+            return Err(GitError::NameFormat);
         }
         if Self::SPECIAL_NAMES.contains(&name) {
             return Ok((String::from(""), String::from(""), String::from(name), true));
         };
-        let slash_index = name.find('/').ok_or(BranchError::NameFormat)?;
-        let branch_code_index = name
-            .find(Self::CODE_PREFIX)
-            .ok_or(BranchError::NameFormat)?
-            + Self::CODE_PREFIX.len();
-        let branch_code_index_end = name.find('_').ok_or(BranchError::NameFormat)?;
+        let slash_index = name.find('/').ok_or(GitError::NameFormat)?;
+        let branch_code_index =
+            name.find(Self::CODE_PREFIX).ok_or(GitError::NameFormat)? + Self::CODE_PREFIX.len();
+        let branch_code_index_end = name.find('_').ok_or(GitError::NameFormat)?;
         let branch_title_index = branch_code_index_end + 1;
         let branch_type = String::from(&name[..slash_index]);
         let branch_code = String::from(&name[branch_code_index..branch_code_index_end]);
@@ -78,34 +113,16 @@ impl Branch {
         return false;
     }
 
-    fn get_raw_name() -> Result<String, BranchError> {
+    fn get_raw_name() -> Result<String, GitError> {
         Command::new("git")
             .arg("branch")
             .arg("--show-current")
             .output()
-            .map_err(|_| BranchError::Git)
+            .map_err(|_| GitError::Git)
             .and_then(|output| {
                 String::from_utf8(output.stdout)
-                    .map_err(|_| BranchError::StringFormat)
+                    .map_err(|_| GitError::StringFormat)
                     .map(|name| name.trim().to_string())
             })
     }
 }
-
-// pub fn get_branch_code() -> String {
-//   let branch_name = Command::new("git")
-//       .arg("branch")
-//       .arg("--show-current")
-//       .output()
-//       .unwrap()
-//       .stdout;
-//   let branch_name = String::from_utf8(branch_name).unwrap();
-//   for branch_type in supported_branch_types.iter() {
-//       if branch_name.starts_with(branch_type) {
-//           continue;
-//       }
-//       panic!("Branch type not supported");
-//   }
-
-//   return String::from("");
-// }

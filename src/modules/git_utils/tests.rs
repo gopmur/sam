@@ -1,42 +1,5 @@
 use super::*;
 
-fn change_back_branch() -> Result<(), ()> {
-    Command::new("git")
-        .arg("checkout")
-        .arg("-")
-        .output()
-        .map_err(|_| ())?;
-    Ok(())
-}
-
-fn make_branch(branch_name: &str) -> Result<(), ()> {
-    Command::new("git")
-        .arg("checkout")
-        .arg(branch_name)
-        .output()
-        .map_err(|_| ())?;
-    Ok(())
-}
-
-fn delete_branch(branch_name: &str) -> Result<(), ()> {
-    Command::new("git")
-        .arg("branch")
-        .arg("-D")
-        .arg(branch_name)
-        .output()
-        .map_err(|_| ())?;
-    Ok(())
-}
-
-fn change_branch(branch_name: &str) -> Result<(), ()> {
-    Command::new("git")
-        .arg("branch")
-        .arg(branch_name)
-        .output()
-        .map_err(|_| ())?;
-    Ok(())
-}
-
 #[test]
 fn test_validate_name_01() {
     assert_eq!(Branch::validate_name("feature/RCT-2341_something"), true);
@@ -121,7 +84,7 @@ fn test_validate_name_16() {
 }
 
 #[test]
-fn test_parse_name_1() -> Result<(), BranchError> {
+fn test_parse_name_1() -> Result<(), GitError> {
     assert_eq!(
         Branch::parse_name("feature/RCT-1234_some_title")?,
         (
@@ -151,22 +114,34 @@ fn test_parse_name_2() {
 fn test_parse_name_3() {
     assert_eq!(
         Branch::parse_name("feature/RCT-1234something"),
-        Err(BranchError::NameFormat)
+        Err(GitError::NameFormat)
     );
 }
 
 #[test]
-fn test_new() -> Result<(), ()> {
-    make_and_change_branch("feature/RCT-1234_test_branch").unw;
+fn test_make_commit_name_1() {
+    let branch = Branch {
+        branch_code: "2222".to_string(),
+        branch_title: "something".to_string(),
+        branch_type: "feature".to_string(),
+        is_special: false,
+    };
     assert_eq!(
-        Branch::new(),
-        Ok(Branch {
-            branch_type: String::from("feature"),
-            branch_code: String::from("1234"),
-            branch_title: String::from("test_branch"),
-            is_special: false
-        })
+        branch.make_commit_message(CommitType::Feat, "this is a commit"),
+        "feat(RCT-2222): this is a commit"
     );
-    // change_back_branch()?;
-    Ok(())
+}
+
+#[test]
+fn test_make_commit_name_2() {
+    let branch = Branch {
+        branch_code: "".to_string(),
+        branch_title: "master".to_string(),
+        branch_type: "".to_string(),
+        is_special: true,
+    };
+    assert_eq!(
+        branch.make_commit_message(CommitType::Feat, "this is a commit"),
+        "feat: this is a commit"
+    );
 }

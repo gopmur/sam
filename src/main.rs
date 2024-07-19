@@ -1,8 +1,7 @@
 mod modules;
 
 use clap::{Args, Parser, Subcommand};
-use modules::git_utils::{self, Branch};
-use std::process::Command;
+use modules::git_utils::Branch;
 
 #[derive(Parser)]
 #[clap(author, version, about)]
