@@ -1,1 +1,0 @@
-pub const INVALID_BRANCH_NAME: &str = "Branch name is invalid";

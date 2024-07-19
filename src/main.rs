@@ -23,9 +23,5 @@ pub struct CommitArgs {
 }
 
 fn main() {
-    let args = Cli::parse();
-    println!("{}", Branch::get_branch_name().unwrap());
-    match args.action {
-        _ => {}
-    }
+    
 }
