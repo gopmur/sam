@@ -48,6 +48,7 @@ impl Branch {
         let commit_message = self.make_commit_message(commit_type, message);
         Command::new("git")
             .arg("commit")
+            .arg("--allow-empty")
             .arg("-m")
             .arg(&commit_message)
             .output()
