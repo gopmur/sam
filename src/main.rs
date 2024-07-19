@@ -19,7 +19,7 @@ pub enum Action {
 pub struct CommitArgs {
     #[clap(action)]
     pub commit_type: String,
-    
+
     #[clap(action)]
     pub message: String,
 }
