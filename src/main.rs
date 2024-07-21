@@ -13,12 +13,22 @@ pub struct Cli {
 #[derive(Subcommand)]
 pub enum Action {
     Commit(CommitArgs),
+    Checkout(CheckoutArgs),
+}
+
+#[derive(Args)]
+pub struct CheckoutArgs {
+    #[clap(action)]
+    pub branch_code: String,
 }
 
 // ! chore, docs, feat, fix, refactor, style, or test should be added in the future
 #[derive(Args)]
 pub struct CommitArgs {
-    #[clap(action, help="Can be either \"feat\", \"fix\", \"style\" or \"chore\"")]
+    #[clap(
+        action,
+        help = "Can be either \"feat\", \"fix\", \"style\" or \"chore\""
+    )]
     pub commit_type: String,
 
     #[clap(action)]
@@ -39,20 +49,32 @@ fn main() {
 
     match args.action {
         Action::Commit(args) => {
-            commit(&args).unwrap_or_else(|error| panic!("\n{}", error.to_string()));
+            Sam::commit(&args).unwrap_or_else(|error| panic!("\n{}", error.to_string()));
         }
+        Action::Checkout(args) => Sam::checkout(&args),
     }
 }
 
-fn commit(args: &CommitArgs) -> Result<(), GitError> {
-    let branch = Branch::new()?;
-    let commit_type = match &args.commit_type[..] {
-        "feat" => CommitType::Feat,
-        "chore" => CommitType::Chore,
-        "style" => CommitType::Style,
-        "fix" => CommitType::Fix,
-        _ => return Err(GitError::CommitType),
-    };
-    branch.commit(commit_type, &args.message, !args.no_add, args.empty, args.run_ci)?;
-    Ok(())
+struct Sam;
+impl Sam {
+    fn commit(args: &CommitArgs) -> Result<(), GitError> {
+        let branch = Branch::new()?;
+        let commit_type = match &args.commit_type[..] {
+            "feat" => CommitType::Feat,
+            "chore" => CommitType::Chore,
+            "style" => CommitType::Style,
+            "fix" => CommitType::Fix,
+            _ => return Err(GitError::CommitType),
+        };
+        branch.commit(
+            commit_type,
+            &args.message,
+            !args.no_add,
+            args.empty,
+            args.run_ci,
+        )?;
+        Ok(())
+    }
+
+    fn checkout(args: &CheckoutArgs) {}
 }
