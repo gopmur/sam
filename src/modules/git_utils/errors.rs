@@ -8,6 +8,7 @@ pub enum GitError {
     Git,
     CommitType,
     Commit,
+    BranchCode,
 }
 
 impl fmt::Display for GitError {
@@ -31,6 +32,9 @@ impl fmt::Display for GitError {
             }
             GitError::Commit => {
                 write!(f, "Some error happened while committing.")
+            }
+            GitError::BranchCode => {
+                write!(f, "Invalid branch code.")
             }
         }
     }

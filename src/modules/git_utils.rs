@@ -20,6 +20,65 @@ pub struct Branch {
     is_special: bool,
 }
 
+fn get_branches() -> Result<Vec<String>, GitError> {
+    let branches_output = Command::new("git")
+        .arg("branch")
+        .arg("-a")
+        .output()
+        .map_err(|_| GitError::Git)?;
+    if branches_output.status.code().unwrap_or(-1) != 0 {
+        return Err(GitError::Git);
+    };
+    let branches = String::from_utf8(branches_output.stdout).map_err(|_| GitError::Git)?;
+    let branches = branches
+        .trim()
+        .split("\n")
+        .map(|branch| {
+            let branch = branch.trim();
+            if branch.starts_with("*") {
+                (&branch[2..]).to_string()
+            } else if branch.contains(" -> ") {
+                let i = branch.find(" -> ").unwrap_or(branch.len());
+                (&branch[0..i]).to_string()
+            } else {
+                branch.to_string()
+            }
+        })
+        .collect::<Vec<String>>();
+    Ok(branches)
+}
+
+pub fn checkout(branch_code: &str) -> Result<(), GitError> {
+    if !branch_code.bytes().all(|c| c.is_ascii_digit()) {
+        return Err(GitError::BranchCode);
+    };
+    let branches = get_branches()?;
+    let matches = branches
+        .iter()
+        .filter(|branch_name| {
+            if let Ok(branch) = Branch::from(&branch_name) {
+                branch.code() == branch_code
+            } else {
+                false
+            }
+        })
+        .collect::<Vec<&String>>();
+    let first_match = matches[0];
+
+    let exit_code = Command::new("git")
+        .arg("checkout")
+        .arg(first_match)
+        .status()
+        .map_err(|_| GitError::Git)?
+        .code()
+        .unwrap_or(-1);
+    if exit_code != 0 {
+        return Err(GitError::Git);
+    }
+
+    Ok(())
+}
+
 impl Branch {
     const VALID_TYPES: [&'static str; 2] = ["feature", "hotfix"];
     const SPECIAL_NAMES: [&'static str; 3] = ["develop", "main", "master"];
@@ -51,7 +110,7 @@ impl Branch {
                 self.branch_code,
                 message.trim(),
                 if run_ci {
-                    " ".to_string() + Self::RUN_CI 
+                    format!(" {}", Self::RUN_CI)
                 } else {
                     "".to_string()
                 }
@@ -118,7 +177,22 @@ impl Branch {
         });
     }
 
+    pub fn from(name: &str) -> Result<Self, GitError> {
+        let (branch_type, branch_code, branch_title, is_special) = Self::parse_name(&name)?;
+        return Ok(Branch {
+            branch_code,
+            branch_title,
+            branch_type,
+            is_special,
+        });
+    }
+
+    pub fn code(&self) -> &str {
+        &self.branch_code
+    }
+
     fn parse_name(name: &str) -> Result<(String, String, String, bool), GitError> {
+        let name = name.trim();
         if !Self::validate_name(name) {
             return Err(GitError::NameFormat);
         }

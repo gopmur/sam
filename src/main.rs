@@ -1,7 +1,7 @@
 mod modules;
 
 use clap::{ArgAction, Args, Parser, Subcommand};
-use modules::git_utils::{errors::GitError, Branch, CommitType};
+use modules::git_utils::{checkout, errors::GitError, Branch, CommitType};
 
 #[derive(Parser)]
 #[clap(author, version, about)]
@@ -76,5 +76,7 @@ impl Sam {
         Ok(())
     }
 
-    fn checkout(args: &CheckoutArgs) {}
+    fn checkout(args: &CheckoutArgs) {
+        checkout(&args.branch_code);
+    }
 }

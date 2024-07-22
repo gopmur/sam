@@ -20,9 +20,8 @@
                 }
             },
             "args": [
-                "commit",
-                "feat",
-                "something",
+                "checkout",
+                "1234",
             ],
             "cwd": "${workspaceFolder}"
         },
