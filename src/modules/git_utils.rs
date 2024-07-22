@@ -48,7 +48,15 @@ fn get_branches() -> Result<Vec<String>, GitError> {
     Ok(branches)
 }
 
-pub fn checkout(branch_code: &str) -> Result<(), GitError> {
+pub fn checkout(input: &str) -> Result<(), GitError> {
+    if Branch::SPECIAL_NAMES.contains(&input) {
+        checkout_literal(input)?;
+    }
+    checkout_with_code(input)?;
+    Ok(())
+}
+
+fn checkout_with_code(branch_code: &str) -> Result<(), GitError> {
     if !branch_code.bytes().all(|c| c.is_ascii_digit()) {
         return Err(GitError::BranchCode);
     };
@@ -67,10 +75,14 @@ pub fn checkout(branch_code: &str) -> Result<(), GitError> {
         return Err(GitError::BranchNotFoundOnCheckout(branch_code.to_string()));
     }
     let first_match = matches[0];
+    checkout_literal(&first_match)?;
+    Ok(())
+}
 
+fn checkout_literal(branch_name: &str) -> Result<(), GitError> {
     let exit_code = Command::new("git")
         .arg("checkout")
-        .arg(first_match)
+        .arg(branch_name)
         .status()
         .map_err(|_| GitError::Git)?
         .code()
@@ -78,7 +90,6 @@ pub fn checkout(branch_code: &str) -> Result<(), GitError> {
     if exit_code != 0 {
         return Err(GitError::Git);
     }
-
     Ok(())
 }
 

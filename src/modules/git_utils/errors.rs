@@ -1,5 +1,4 @@
 use core::fmt;
-use std::fmt::write;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum GitError {
