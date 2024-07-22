@@ -77,6 +77,6 @@ impl Sam {
     }
 
     fn checkout(args: &CheckoutArgs) {
-        checkout(&args.branch_code);
+        checkout(&args.branch_code).unwrap_or_else(|error| panic!("{}", error.to_string()));
     }
 }

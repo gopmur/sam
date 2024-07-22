@@ -1,4 +1,5 @@
 use core::fmt;
+use std::fmt::write;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum GitError {
@@ -9,6 +10,7 @@ pub enum GitError {
     CommitType,
     Commit,
     BranchCode,
+    BranchNotFoundOnCheckout(String),
 }
 
 impl fmt::Display for GitError {
@@ -35,6 +37,9 @@ impl fmt::Display for GitError {
             }
             GitError::BranchCode => {
                 write!(f, "Invalid branch code.")
+            }
+            GitError::BranchNotFoundOnCheckout(branch_code) => {
+                write!(f, "Branch with the code {} does not exists", branch_code)
             }
         }
     }

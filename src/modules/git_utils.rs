@@ -63,6 +63,9 @@ pub fn checkout(branch_code: &str) -> Result<(), GitError> {
             }
         })
         .collect::<Vec<&String>>();
+    if matches.len() == 0 {
+        return Err(GitError::BranchNotFoundOnCheckout(branch_code.to_string()));
+    }
     let first_match = matches[0];
 
     let exit_code = Command::new("git")
