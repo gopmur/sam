@@ -112,7 +112,7 @@ pub fn new_branch(
             source.clone()
         } else {
             let branches = get_branches()?;
-            let matches = filter_branches_by_code(&branches, branch_code);
+            let matches = filter_branches_by_code(&branches, source);
             if matches.len() == 0 {
                 return Err(GitError::BranchNotFoundOnCheckout(source.to_string()));
             }

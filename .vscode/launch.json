@@ -20,8 +20,14 @@
                 }
             },
             "args": [
-                "checkout",
-                "1234",
+                "new",
+                "feature",
+                "2222",
+                "from_test",
+                "-s",
+                "1234"
+                // "checkout",
+                // "1234"
             ],
             "cwd": "${workspaceFolder}"
         },
