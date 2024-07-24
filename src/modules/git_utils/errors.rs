@@ -11,7 +11,6 @@ pub enum GitError {
     BranchCode,
     BranchNotFoundOnCheckout(String),
     InvalidBranchType(String),
-    IncompatibleArguments(Vec<String>),
 }
 
 impl fmt::Display for GitError {
@@ -44,9 +43,6 @@ impl fmt::Display for GitError {
             }
             GitError::InvalidBranchType(branch_type) => {
                 write!(f, "Branch type {} is invalid", branch_type)
-            }
-            GitError::IncompatibleArguments(arguments) => {
-                write!(f, "Incompatible arguments: {}", arguments.join(", "))
             }
         }
     }
