@@ -48,6 +48,19 @@ fn get_branches() -> Result<Vec<String>, GitError> {
     Ok(branches)
 }
 
+fn filter_branches_by_code<'a>(branches: &'a Vec<String>, branch_code: &str) -> Vec<&'a String> {
+    branches
+        .iter()
+        .filter(|branch_name| {
+            if let Ok(branch) = Branch::from(&branch_name) {
+                branch.code() == branch_code
+            } else {
+                false
+            }
+        })
+        .collect::<Vec<&String>>()
+}
+
 pub fn checkout(input: &str) -> Result<(), GitError> {
     if Branch::SPECIAL_NAMES.contains(&input) {
         checkout_literal(input)?;
@@ -62,20 +75,11 @@ fn checkout_with_code(branch_code: &str) -> Result<(), GitError> {
         return Err(GitError::BranchCode);
     };
     let branches = get_branches()?;
-    let matches = branches
-        .iter()
-        .filter(|branch_name| {
-            if let Ok(branch) = Branch::from(&branch_name) {
-                branch.code() == branch_code
-            } else {
-                false
-            }
-        })
-        .collect::<Vec<&String>>();
-    if matches.len() == 0 {
+    let matches = filter_branches_by_code(&branches, branch_code);
+    if matches.is_empty() {
         return Err(GitError::BranchNotFoundOnCheckout(branch_code.to_string()));
     }
-    let first_match = matches[0];
+    let first_match = &matches[0];
     checkout_literal(&first_match)?;
     Ok(())
 }
@@ -99,10 +103,21 @@ pub fn new_branch(
     branch_code: &str,
     branch_name: &str,
     source: &Option<String>,
+    literal_source: bool,
     from_current: bool,
 ) -> Result<(), GitError> {
     let raw_name = Branch::make_raw_name(branch_type, branch_code, branch_name)?;
     let exit_code = if let Some(source) = source {
+        let source = if literal_source || Branch::SPECIAL_NAMES.contains(&source.as_str()) {
+            source.clone()
+        } else {
+            let branches = get_branches()?;
+            let matches = filter_branches_by_code(&branches, branch_code);
+            if matches.len() == 0 {
+                return Err(GitError::BranchNotFoundOnCheckout(source.to_string()));
+            }
+            matches[0].clone()
+        };
         Command::new("git")
             .arg("checkout")
             .arg("-b")

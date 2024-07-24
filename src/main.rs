@@ -29,17 +29,23 @@ pub struct NewArgs {
     #[clap(action)]
     pub branch_name: String,
 
+    // ! FIX source should use branch_code
     #[clap(action, short, long, conflicts_with = "from_current")]
     pub source: Option<String>,
 
+    #[clap(action=ArgAction::SetTrue, short, long, requires = "source")]
+    pub literal_source: bool,
+
     #[clap(action=ArgAction::SetTrue, short='c', long, help="Create branch from current branch", conflicts_with="source")]
     pub from_current: bool,
+    // TODO add --force option for duplicate code
 }
 
 #[derive(Args)]
 pub struct CheckoutArgs {
     #[clap(action)]
     pub branch_code: String,
+    // TODO add --literal option
 }
 
 // ! chore, docs, feat, fix, refactor, style, or test should be added in the future
@@ -111,6 +117,7 @@ impl Sam {
             &args.branch_code,
             &args.branch_name,
             &args.source,
+            args.literal_source,
             args.from_current,
         )?;
         Ok(())
