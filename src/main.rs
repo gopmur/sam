@@ -29,8 +29,11 @@ pub struct NewArgs {
     #[clap(action)]
     pub branch_name: String,
 
-    #[clap(action, short, long)]
+    #[clap(action, short, long, conflicts_with = "from_current")]
     pub source: Option<String>,
+
+    #[clap(action=ArgAction::SetTrue, short='c', long, help="Create branch from current branch", conflicts_with="source")]
+    pub from_current: bool,
 }
 
 #[derive(Args)]
@@ -102,12 +105,12 @@ impl Sam {
     }
 
     fn new(args: &NewArgs) -> Result<(), GitError> {
-        let from_current = args.source.is_none();
         git_utils::new_branch(
             &args.branch_type,
             &args.branch_code,
             &args.branch_name,
-            from_current,
+            &args.source,
+            args.from_current,
         )?;
         Ok(())
     }

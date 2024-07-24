@@ -97,28 +97,36 @@ pub fn new_branch(
     branch_type: &str,
     branch_code: &str,
     branch_name: &str,
+    source: &Option<String>,
     from_current: bool,
 ) -> Result<(), GitError> {
     let raw_name = Branch::make_raw_name(branch_type, branch_code, branch_name)?;
-    if from_current {
-        let exit_code = Command::new("git")
+    let exit_code = if let Some(source) = source {
+        Command::new("git")
+            .arg("checkout")
+            .arg("-b")
+            .arg(&raw_name)
+            .arg(source)
+            .status()
+            .map_err(|_| GitError::Git)?
+            .code()
+            .unwrap_or(-1)
+    } else if from_current {
+        Command::new("git")
             .arg("checkout")
             .arg("-b")
             .arg(&raw_name)
             .status()
             .map_err(|_| GitError::Git)?
             .code()
-            .unwrap_or(-1);
-        if exit_code != 0 {
-            return Err(GitError::Git);
-        }
+            .unwrap_or(-1)
     } else {
         let source_branch = match branch_type {
             "feature" => "develop",
             "hotfix" => "master", // ! needs configuring
             _ => return Err(GitError::InvalidBranchType(branch_type.to_string())),
         };
-        let exit_code = Command::new("git")
+        Command::new("git")
             .arg("checkout")
             .arg("-b")
             .arg(&raw_name)
@@ -126,10 +134,10 @@ pub fn new_branch(
             .status()
             .map_err(|_| GitError::Git)?
             .code()
-            .unwrap_or(-1);
-        if exit_code != 0 {
-            return Err(GitError::Git);
-        }
+            .unwrap_or(-1)
+    };
+    if exit_code != 0 {
+        return Err(GitError::Git);
     }
     Ok(())
 }
