@@ -37,7 +37,7 @@ pub struct CommitArgs {
     #[clap(action=ArgAction::SetTrue, short, long, help="Run CI")]
     pub run_ci: bool,
 
-    #[clap(action=ArgAction::SetFalse, short, long, help="Do not run git add before committing")]
+    #[clap(action=ArgAction::SetTrue, short, long, help="Do not run git add before committing")]
     pub no_add: bool,
 
     #[clap(action=ArgAction::SetTrue, short, long, help="Allow empty commit")]

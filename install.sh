@@ -1,0 +1,1 @@
+install target/release/sam /usr/bin
