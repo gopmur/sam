@@ -2,6 +2,7 @@ mod modules;
 
 use clap::{ArgAction, Args, Parser, Subcommand};
 use modules::git_utils::{self, errors::GitError, Branch, CommitType};
+use std::process;
 
 #[derive(Parser)]
 #[clap(author, version, about)]
@@ -14,6 +15,22 @@ pub struct Cli {
 pub enum Action {
     Commit(CommitArgs),
     Checkout(CheckoutArgs),
+    New(NewArgs),
+}
+
+#[derive(Args)]
+pub struct NewArgs {
+    #[clap(action)]
+    pub branch_type: String,
+
+    #[clap(action)]
+    pub branch_code: String,
+
+    #[clap(action)]
+    pub branch_name: String,
+
+    #[clap(action, short, long)]
+    pub source: Option<String>,
 }
 
 #[derive(Args)]
@@ -48,11 +65,14 @@ fn main() {
     let args = Cli::parse();
 
     match args.action {
-        Action::Commit(args) => {
-            Sam::commit(&args).unwrap_or_else(|error| panic!("\n{}", error.to_string()));
-        }
+        Action::Commit(args) => Sam::commit(&args),
         Action::Checkout(args) => Sam::checkout(&args),
+        Action::New(args) => Sam::new(&args),
     }
+    .unwrap_or_else(|error| {
+        println!("{}", error);
+        process::exit(-1);
+    })
 }
 
 struct Sam;
@@ -76,7 +96,19 @@ impl Sam {
         Ok(())
     }
 
-    fn checkout(args: &CheckoutArgs) {
-        git_utils::checkout(&args.branch_code).unwrap_or_else(|error| panic!("{}", error.to_string()));
+    fn checkout(args: &CheckoutArgs) -> Result<(), GitError> {
+        git_utils::checkout(&args.branch_code)?;
+        Ok(())
+    }
+
+    fn new(args: &NewArgs) -> Result<(), GitError> {
+        let from_current = args.source.is_none();
+        git_utils::new_branch(
+            &args.branch_type,
+            &args.branch_code,
+            &args.branch_name,
+            from_current,
+        )?;
+        Ok(())
     }
 }

@@ -3,7 +3,7 @@ pub mod errors;
 mod tests;
 
 use errors::GitError;
-use std::process::Command;
+use std::process::{Command, ExitCode};
 
 pub enum CommitType {
     Feat,
@@ -93,11 +93,80 @@ fn checkout_literal(branch_name: &str) -> Result<(), GitError> {
     Ok(())
 }
 
+pub fn new_branch(
+    branch_type: &str,
+    branch_code: &str,
+    branch_name: &str,
+    from_current: bool,
+) -> Result<(), GitError> {
+    let raw_name = Branch::make_raw_name(branch_type, branch_code, branch_name)?;
+    if from_current {
+        let exit_code = Command::new("git")
+            .arg("checkout")
+            .arg("-b")
+            .arg(&raw_name)
+            .status()
+            .map_err(|_| GitError::Git)?
+            .code()
+            .unwrap_or(-1);
+        if exit_code != 0 {
+            return Err(GitError::Git);
+        }
+    } else {
+        let source_branch = match branch_type {
+            "feature" => "develop",
+            "hotfix" => "master", // ! needs configuring
+            _ => return Err(GitError::InvalidBranchType(branch_type.to_string())),
+        };
+        let exit_code = Command::new("git")
+            .arg("checkout")
+            .arg("-b")
+            .arg(&raw_name)
+            .arg(source_branch)
+            .status()
+            .map_err(|_| GitError::Git)?
+            .code()
+            .unwrap_or(-1);
+        if exit_code != 0 {
+            return Err(GitError::Git);
+        }
+    }
+    Ok(())
+}
+
 impl Branch {
     const VALID_TYPES: [&'static str; 2] = ["feature", "hotfix"];
     const SPECIAL_NAMES: [&'static str; 3] = ["develop", "main", "master"];
     const CODE_PREFIX: &'static str = "RCT-";
     const RUN_CI: &'static str = "(run_ci)";
+
+    fn make_raw_name(
+        branch_type: &str,
+        branch_code: &str,
+        branch_name: &str,
+    ) -> Result<String, GitError> {
+        if Branch::SPECIAL_NAMES.contains(&branch_name)
+            && branch_code.is_empty()
+            && branch_type.is_empty()
+        {
+            return Ok(branch_name.to_string());
+        }
+        if !branch_code.bytes().all(|c| c.is_ascii_digit()) {
+            return Err(GitError::BranchCode);
+        }
+        if !Branch::VALID_TYPES.contains(&branch_type) {
+            return Err(GitError::InvalidBranchType(branch_type.to_string()));
+        }
+        let raw_name = format!(
+            "{}/{}{}_{}",
+            branch_type,
+            Branch::CODE_PREFIX,
+            branch_code,
+            branch_name
+        )
+        .to_string();
+        Ok(raw_name)
+    }
 
     fn make_commit_message(&self, commit_type: CommitType, message: &str, run_ci: bool) -> String {
         let commit_type = match commit_type {

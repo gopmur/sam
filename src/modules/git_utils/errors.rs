@@ -10,6 +10,7 @@ pub enum GitError {
     Commit,
     BranchCode,
     BranchNotFoundOnCheckout(String),
+    InvalidBranchType(String),
 }
 
 impl fmt::Display for GitError {
@@ -39,6 +40,9 @@ impl fmt::Display for GitError {
             }
             GitError::BranchNotFoundOnCheckout(branch_code) => {
                 write!(f, "Branch with the code {} does not exists", branch_code)
+            }
+            GitError::InvalidBranchType(branch_type) => {
+                write!(f, "Branch type {} is invalid", branch_type)
             }
         }
     }
