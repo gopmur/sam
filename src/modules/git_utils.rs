@@ -51,6 +51,7 @@ fn get_branches() -> Result<Vec<String>, GitError> {
 pub fn checkout(input: &str) -> Result<(), GitError> {
     if Branch::SPECIAL_NAMES.contains(&input) {
         checkout_literal(input)?;
+        return Ok(());
     }
     checkout_with_code(input)?;
     Ok(())

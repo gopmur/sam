@@ -104,6 +104,7 @@ impl Sam {
         Ok(())
     }
 
+    // TODO check for duplicate branch code
     fn new(args: &NewArgs) -> Result<(), GitError> {
         git_utils::new_branch(
             &args.branch_type,
