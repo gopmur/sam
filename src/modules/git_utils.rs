@@ -3,7 +3,7 @@ pub mod errors;
 mod tests;
 
 use errors::GitError;
-use std::process::{Command, ExitCode};
+use std::process::Command;
 
 pub enum CommitType {
     Feat,
