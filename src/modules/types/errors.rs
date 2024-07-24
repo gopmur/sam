@@ -1,7 +1,7 @@
 use core::fmt;
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum GitError {
+pub enum Error {
     NameFormat,
     StringFormat,
     Add,
@@ -13,35 +13,35 @@ pub enum GitError {
     InvalidBranchType(String),
 }
 
-impl fmt::Display for GitError {
+impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            GitError::NameFormat => write!(f, "Branch name is in an invalid format."),
-            GitError::StringFormat => {
+            Error::NameFormat => write!(f, "Branch name is in an invalid format."),
+            Error::StringFormat => {
                 write!(f, "Branch name has unsupported character or is corrupted.")
             }
-            GitError::Git => {
+            Error::Git => {
                 write!(
                     f,
                     "Some error happened with git. Make sure git is installed correctly."
                 )
             }
-            GitError::Add => {
+            Error::Add => {
                 write!(f, "Some error occurred while running git add.")
             }
-            GitError::CommitType => {
+            Error::CommitType => {
                 write!(f, "Invalid commit type.")
             }
-            GitError::Commit => {
+            Error::Commit => {
                 write!(f, "Some error happened while committing.")
             }
-            GitError::BranchCode => {
+            Error::BranchCode => {
                 write!(f, "Invalid branch code.")
             }
-            GitError::BranchNotFoundOnCheckout(branch_code) => {
+            Error::BranchNotFoundOnCheckout(branch_code) => {
                 write!(f, "Branch with the code {} does not exists", branch_code)
             }
-            GitError::InvalidBranchType(branch_type) => {
+            Error::InvalidBranchType(branch_type) => {
                 write!(f, "Branch type {} is invalid", branch_type)
             }
         }

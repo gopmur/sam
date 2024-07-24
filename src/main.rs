@@ -1,7 +1,7 @@
 mod modules;
 
 use clap::{ArgAction, Args, Parser, Subcommand};
-use modules::git_utils::{self, errors::GitError, Branch, CommitType};
+use modules::subcommands;
 use std::process;
 
 #[derive(Parser)]
@@ -74,52 +74,13 @@ fn main() {
     let args = Cli::parse();
 
     match args.action {
-        Action::Commit(args) => Sam::commit(&args),
-        Action::Checkout(args) => Sam::checkout(&args),
-        Action::New(args) => Sam::new(&args),
+        Action::Commit(args) => subcommands::commit::exec(&args),
+        Action::Checkout(args) => subcommands::checkout::exec(&args.branch_code),
+        // TODO check for duplicate branch code
+        Action::New(args) => subcommands::new::exec(&args),
     }
     .unwrap_or_else(|error| {
         println!("{}", error);
         process::exit(-1);
     })
-}
-
-struct Sam;
-impl Sam {
-    fn commit(args: &CommitArgs) -> Result<(), GitError> {
-        let branch = Branch::new()?;
-        let commit_type = match &args.commit_type[..] {
-            "feat" => CommitType::Feat,
-            "chore" => CommitType::Chore,
-            "style" => CommitType::Style,
-            "fix" => CommitType::Fix,
-            _ => return Err(GitError::CommitType),
-        };
-        branch.commit(
-            commit_type,
-            &args.message,
-            !args.no_add,
-            args.empty,
-            args.run_ci,
-        )?;
-        Ok(())
-    }
-
-    fn checkout(args: &CheckoutArgs) -> Result<(), GitError> {
-        git_utils::checkout(&args.branch_code)?;
-        Ok(())
-    }
-
-    // TODO check for duplicate branch code
-    fn new(args: &NewArgs) -> Result<(), GitError> {
-        git_utils::new_branch(
-            &args.branch_type,
-            &args.branch_code,
-            &args.branch_name,
-            &args.source,
-            args.literal_source,
-            args.from_current,
-        )?;
-        Ok(())
-    }
 }

@@ -84,7 +84,7 @@ fn test_validate_name_16() {
 }
 
 #[test]
-fn test_parse_name_1() -> Result<(), GitError> {
+fn test_parse_name_1() -> Result<(), Error> {
     assert_eq!(
         Branch::parse_name("feature/RCT-1234_some_title")?,
         (
@@ -114,7 +114,7 @@ fn test_parse_name_2() {
 fn test_parse_name_3() {
     assert_eq!(
         Branch::parse_name("feature/RCT-1234something"),
-        Err(GitError::NameFormat)
+        Err(Error::NameFormat)
     );
 }
 
