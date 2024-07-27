@@ -1,6 +1,10 @@
 use std::process::Command;
 
-use crate::modules::{helpers::branch::{filter_branches_by_code, get_branches}, structs::branch::Branch, types::errors::Error};
+use crate::modules::{
+    helpers::branch::{filter_branches_by_code, get_branches},
+    structs::branch::Branch,
+    types::errors::Error,
+};
 
 pub fn exec(input: &str) -> Result<(), Error> {
     if Branch::SPECIAL_NAMES.contains(&input) {

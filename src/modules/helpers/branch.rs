@@ -1,4 +1,4 @@
-use std::process::Command;
+use std::{collections::HashSet, process::Command};
 
 use crate::modules::{structs::branch::Branch, types::errors::Error};
 
@@ -12,6 +12,7 @@ pub fn get_branches() -> Result<Vec<String>, Error> {
         return Err(Error::Git);
     };
     let branches = String::from_utf8(branches_output.stdout).map_err(|_| Error::Git)?;
+    // !! performance should be investigated
     let branches = branches
         .trim()
         .split("\n")
@@ -22,15 +23,22 @@ pub fn get_branches() -> Result<Vec<String>, Error> {
             } else if branch.contains(" -> ") {
                 let i = branch.find(" -> ").unwrap_or(branch.len());
                 (&branch[0..i]).to_string()
+            } else if branch.starts_with(Branch::REMOTE_PREFIX) {
+                (&branch[Branch::REMOTE_PREFIX.len()..]).to_string()
             } else {
                 branch.to_string()
             }
         })
+        .collect::<HashSet<String>>()
+        .into_iter()
         .collect::<Vec<String>>();
     Ok(branches)
 }
 
-pub fn filter_branches_by_code<'a>(branches: &'a Vec<String>, branch_code: &str) -> Vec<&'a String> {
+pub fn filter_branches_by_code<'a>(
+    branches: &'a Vec<String>,
+    branch_code: &str,
+) -> Vec<&'a String> {
     branches
         .iter()
         .filter(|branch_name| {

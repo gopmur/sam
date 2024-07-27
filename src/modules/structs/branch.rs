@@ -18,6 +18,7 @@ impl Branch {
     pub const SPECIAL_NAMES: [&'static str; 3] = ["develop", "main", "master"];
     pub const CODE_PREFIX: &'static str = "RCT-";
     pub const RUN_CI: &'static str = "(run_ci)";
+    pub const REMOTE_PREFIX: &'static str = "remotes/origin/";
 
     pub fn make_raw_name(
         branch_type: &str,
