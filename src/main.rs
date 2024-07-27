@@ -16,6 +16,7 @@ pub enum Action {
     Commit(CommitArgs),
     Checkout(CheckoutArgs),
     New(NewArgs),
+    Ls,
 }
 
 #[derive(Args)]
@@ -78,6 +79,7 @@ fn main() {
         Action::Checkout(args) => subcommands::checkout::exec(&args.branch_code),
         // TODO check for duplicate branch code
         Action::New(args) => subcommands::new::exec(&args),
+        Action::Ls => subcommands::ls::exec(),
     }
     .unwrap_or_else(|error| {
         println!("{}", error);
