@@ -1,1 +1,1 @@
-install target/release/sam /usr/bin
+install target/release/git-sam /usr/bin

@@ -7,3 +7,7 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.5.9", features = ["derive"] }
+
+[[bin]]
+name = "git-sam"
+path = "src/main.rs"
