@@ -16,6 +16,7 @@ pub enum Action {
     Commit(CommitArgs),
     Checkout(CheckoutArgs),
     New(NewArgs),
+    RunCi,
     Ls,
 }
 
@@ -80,6 +81,7 @@ fn main() {
         // TODO check for duplicate branch code
         Action::New(args) => subcommands::new::exec(&args),
         Action::Ls => subcommands::ls::exec(),
+        Action::RunCi => subcommands::run_ci::exec(),
     }
     .unwrap_or_else(|error| {
         println!("{}", error);
