@@ -170,7 +170,7 @@ impl Branch {
         else {
             name.find(Self::CODE_PREFIX).ok_or(Error::NameFormat)? + Self::CODE_PREFIX.len()
         };
-        let branch_code_index_end = name.find('_').ok_or(Error::NameFormat)?;
+        let branch_code_index_end = &name[branch_code_index..].find(|c: char| !(c.is_ascii() && c.is_numeric())).ok_or(Error::NameFormat)? + branch_code_index;
         let branch_title_index = branch_code_index_end + 1;
         let branch_type = String::from(&name[..slash_index]);
         let branch_code = String::from(&name[branch_code_index..branch_code_index_end]);
@@ -198,7 +198,7 @@ impl Branch {
                 if c >= '0' && c <= '9' {
                     continue;
                 }
-                if c == '_' {
+                if c == '_' || c == '-' {
                     break;
                 }
             }

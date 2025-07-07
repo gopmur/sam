@@ -86,11 +86,11 @@ fn test_validate_name_16() {
 #[test]
 fn test_parse_name_1() -> Result<(), Error> {
     assert_eq!(
-        Branch::parse_name("feature/1234_some_title")?,
+        Branch::parse_name("feature/13-fix-build-warnings")?,
         (
             String::from("feature"),
-            String::from("1234"),
-            String::from("some_title"),
+            String::from("13"),
+            String::from("fix-build-warnings"),
             false
         )
     );
