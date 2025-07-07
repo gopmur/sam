@@ -2,12 +2,12 @@ use super::*;
 
 #[test]
 fn test_validate_name_01() {
-    assert_eq!(Branch::validate_name("feature/RCT-2341_something"), true);
+    assert_eq!(Branch::validate_name("feature/2341_something"), true);
 }
 
 #[test]
 fn test_validate_name_02() {
-    assert_eq!(Branch::validate_name("hotfix/RCT-2341_something"), true);
+    assert_eq!(Branch::validate_name("hotfix/2341_something"), true);
 }
 
 #[test]
@@ -22,45 +22,45 @@ fn test_validate_name_04() {
 
 #[test]
 fn test_validate_name_05() {
-    assert_eq!(Branch::validate_name("feat/RCT-2341_something"), false);
+    assert_eq!(Branch::validate_name("feat/2341_something"), false);
 }
 
 #[test]
 fn test_validate_name_06() {
-    assert_eq!(Branch::validate_name("fix/RCT-2341_something"), false);
+    assert_eq!(Branch::validate_name("fix/2341_something"), false);
 }
 
 #[test]
 fn test_validate_name_07() {
-    assert_eq!(Branch::validate_name("fix/something_RCT-2341"), false);
+    assert_eq!(Branch::validate_name("fix/something_2341"), false);
 }
 
 #[test]
 fn test_validate_name_08() {
-    assert_eq!(Branch::validate_name("feature/something_RCT-2341"), false);
+    assert_eq!(Branch::validate_name("feature/something_2341"), false);
 }
 
 #[test]
 fn test_validate_name_09() {
-    assert_eq!(Branch::validate_name("feature//RCT-1234_something"), false);
+    assert_eq!(Branch::validate_name("feature//1234_something"), false);
 }
 
 #[test]
 fn test_validate_name_10() {
     assert_eq!(
-        Branch::validate_name("feature/RCT-something_something"),
+        Branch::validate_name("feature/something_something"),
         false
     );
 }
 
 #[test]
 fn test_validate_name_11() {
-    assert_eq!(Branch::validate_name("feature/RCT-1234something"), false);
+    assert_eq!(Branch::validate_name("feature/1234something"), false);
 }
 
 #[test]
 fn test_validate_name_12() {
-    assert_eq!(Branch::validate_name("featureRCT-1234_something"), false);
+    assert_eq!(Branch::validate_name("feature1234_something"), false);
 }
 
 #[test]
@@ -86,7 +86,7 @@ fn test_validate_name_16() {
 #[test]
 fn test_parse_name_1() -> Result<(), Error> {
     assert_eq!(
-        Branch::parse_name("feature/RCT-1234_some_title")?,
+        Branch::parse_name("feature/1234_some_title")?,
         (
             String::from("feature"),
             String::from("1234"),
@@ -113,7 +113,7 @@ fn test_parse_name_2() {
 #[test]
 fn test_parse_name_3() {
     assert_eq!(
-        Branch::parse_name("feature/RCT-1234something"),
+        Branch::parse_name("feature/1234something"),
         Err(Error::NameFormat)
     );
 }
@@ -128,7 +128,7 @@ fn test_make_commit_name_1() {
     };
     assert_eq!(
         branch.make_commit_message(CommitType::Feat, "this is a commit", false),
-        "feat(RCT-2222): this is a commit"
+        "feat(#2222): this is a commit"
     );
 }
 
@@ -170,6 +170,6 @@ fn test_make_commit_name_4() {
     };
     assert_eq!(
         branch.make_commit_message(CommitType::Feat, "this is a commit", true),
-        "feat(RCT-2222): this is a commit (run_ci)"
+        "feat(#2222): this is a commit (run_ci)"
     );
 }

@@ -16,7 +16,7 @@ pub struct Branch {
 impl Branch {
     pub const VALID_TYPES: [&'static str; 2] = ["feature", "hotfix"];
     pub const SPECIAL_NAMES: [&'static str; 3] = ["develop", "main", "master"];
-    pub const CODE_PREFIX: &'static str = "RCT-";
+    pub const CODE_PREFIX: &'static str = "";
     pub const RUN_CI: &'static str = "(run_ci)";
     pub const REMOTE_PREFIX: &'static str = "remotes/origin/";
 
@@ -68,7 +68,7 @@ impl Branch {
             )
         } else {
             format!(
-                "{}(RCT-{}): {}{}",
+                "{}(#{}): {}{}",
                 commit_type,
                 self.branch_code,
                 message.trim(),
@@ -163,8 +163,13 @@ impl Branch {
             return Ok((String::from(""), String::from(""), String::from(name), true));
         };
         let slash_index = name.find('/').ok_or(Error::NameFormat)?;
-        let branch_code_index =
-            name.find(Self::CODE_PREFIX).ok_or(Error::NameFormat)? + Self::CODE_PREFIX.len();
+        
+        let branch_code_index = if Self::CODE_PREFIX.is_empty() {
+            slash_index + 1
+        }
+        else {
+            name.find(Self::CODE_PREFIX).ok_or(Error::NameFormat)? + Self::CODE_PREFIX.len()
+        };
         let branch_code_index_end = name.find('_').ok_or(Error::NameFormat)?;
         let branch_title_index = branch_code_index_end + 1;
         let branch_type = String::from(&name[..slash_index]);
